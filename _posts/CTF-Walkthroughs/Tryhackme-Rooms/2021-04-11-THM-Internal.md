@@ -1,11 +1,12 @@
 ---
 title: TryHackMe - Internal
 author: Fawaz Masood Qureshi
-date: 2021-04-12 16:30:00 +0500
+date: 2021-04-12 18:00:00 +0500
 comments: false
 categories: [CTF-Walkthroughs, Tryhackme-Rooms]
-tags: [ctf, cyber security, tryhackme]
+tags: [ctf, tryhackme]
 ---
+[Intenal](https://tryhackme.com/room/internal) is a hard difficulty penetration testing challenge created by [TheMayor](https://tryhackme.com/p/TheMayor). 
 
 # Enumeration
 Lets start our nmap scan and see what ports are open and what services are running on these ports.
@@ -32,7 +33,7 @@ Nmap done: 1 IP address (1 host up) scanned in 32.28 seconds
 
 ```
 
-So we have two ports open, 22 and 80. Let us first enumerate the content on port 80.
+So we have two ports open, **22** and **80**. Let us first enumerate the content on port 80.
 
 ## Enumerating the port 80:
 First thing we can do is to check for any files or directories on the server:
@@ -53,8 +54,7 @@ Found a valid password for user **admin**:
 
 ![](/assets/img/posts/thm-internal/Screenshot_20210409_173140.png)
 
-So now we can use these credentials and login as admin at http://internal.thm/blog/wp-login.php.
-> If you are not able to access the internal.thm on your browser, you need to add the domain name and IP to your `/etc/hosts` file.
+So now we can use these credentials and login as admin.
 
 While checking the admin panel, we see that there are two posts. From which one is private. This post contains some sort of credentials.
 
@@ -67,7 +67,7 @@ We have access to mutiple **.php** files. So simply uploading a reverse shell in
 ![](/assets/img/posts/thm-internal/Screenshot_20210409_182015.png)
 
 I used the following reverse shell from pentestmonkey github repo:
-https://raw.githubusercontent.com/pentestmonkey/php-reverse-shell/master/php-reverse-shell.php
+[Link](https://raw.githubusercontent.com/pentestmonkey/php-reverse-shell/master/php-reverse-shell.php)
 
 After setting up a netcat listener we can browse to non-existing endpoint on the blog so that the 404.php code runs. As soon as we hit the 404.php, we will get a reverse shell:
 
@@ -76,14 +76,14 @@ After setting up a netcat listener we can browse to non-existing endpoint on the
 Okay, we are in! 
 
 # Post exploitation
-We can see a user `aubreanna` in the home directory. Doing a little enumeration on the box will reveal that there is a jenkins server running locally:
+We can see a user `aubreanna` in the home directory. Doing a little enumeration on the box revealed that there is a jenkins server running locally:
 ```bash
 netstat -anotp
 ```
 
 ![](/assets/img/posts/thm-internal/Screenshot_20210409_211849.png)
 
-You can see that port **8080** is open and listening. Now if you list the processes, you will see a java program running (which is jenkins):
+We can see that port **8080** is open and listening. Now if we list the processes, we will see a java program running (which is jenkins):
 ```bash
 ps aux
 ```
@@ -97,7 +97,7 @@ Googling about jenkins reveals that the default port for jenkins is **8080**.
 ## Port Forward
 To access the jenkins from our local machine, we'll need to forward the port. I'll be using **chisel**.
 
-First we'll need to get the chisel binary on the target system. This can be done usng a smple python server. 
+First we'll need to get the chisel binary on the target system. This can be done using a smple python server. 
 Once we have chisel on the target we can start chisel server at target:
 ```bash
 chisel server -p 6666	# we can choose any random port
@@ -109,11 +109,11 @@ chisel client <Target Ip>:6666 9999:127.0.0.1:8080	# 9999 is our local machine's
 
 ![](/assets/img/posts/thm-internal/Screenshot_20210410_194257.png)
 
-Now you'll be able to access the jenkin from your local machine at the address **`127.0.0.1:9999`:**
+Now we'll be able to access the jenkin from our local machine at the address **`127.0.0.1:9999`:**
 
 ![](/assets/img/posts/thm-internal/Screenshot_20210410_194426.png)
 
-I tried the credentials that we found so far but both did not worked. So lets brutforce the login. We'll be using Hydra here:
+I tried the credentials that we found so far but both did not worked. So lets brutforce the login. I'll be using Hydra here:
 
 ```bash
 hydra -l admin -P /wordlists/rockyou.txt 127.0.0.1 -s 9999  http-post-form '/j_acegi_security_check:j_username=admin&j_password=^PASS^&from=%2F&Submit=Sign+in:Invalid+username+or+password'

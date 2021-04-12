@@ -4,7 +4,7 @@ author:
 date: 2021-01-15 21:00:00 +0500
 comments: false
 categories: [CTF-Walkthroughs, CyberSecurity-Competitions]
-tags: [ctf, cyber security]
+tags: [ctf, competition, hackerone]
 ---
 
 __Assalam-o-Alaikum & Hello Folks!__ 

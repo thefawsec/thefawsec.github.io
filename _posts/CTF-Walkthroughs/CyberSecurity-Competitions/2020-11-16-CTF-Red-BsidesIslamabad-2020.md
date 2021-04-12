@@ -4,7 +4,7 @@ author:
 date: 2020-11-16 15:00:00 +0500
 comments: false
 categories: [CTF-Walkthroughs, CyberSecurity-Competitions]
-tags: [ctf, bsidespakistan, cyber security] # TAG names should always be lowercase
+tags: [ctf, competition, bsidespakistan,] # TAG names should always be lowercase
 ---
 
 **Assalam-o-Alaikum folks!**
